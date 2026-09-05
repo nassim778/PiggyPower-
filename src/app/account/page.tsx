@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/components/auth/AuthProvider";
 
 export default function AccountPage() {
-  const { user, role, loading, logout, configured } = useAuth();
+  const { user, role, loading, logout, configured, refreshRole } = useAuth();
   const router = useRouter();
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     if (!loading && !user && configured) {
@@ -49,6 +50,12 @@ export default function AccountPage() {
           <p className="text-xs font-semibold uppercase tracking-wide text-ash">Role</p>
           <p className="mt-1 capitalize text-ink">{role || "customer"}</p>
         </div>
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-ash">
+            User ID (Firestore doc id)
+          </p>
+          <p className="mt-1 break-all font-mono text-xs text-ash">{user?.uid}</p>
+        </div>
       </div>
 
       <div className="mt-8 flex flex-wrap gap-3">
@@ -63,6 +70,21 @@ export default function AccountPage() {
             Admin dashboard
           </Link>
         )}
+        <button
+          type="button"
+          disabled={refreshing}
+          onClick={async () => {
+            setRefreshing(true);
+            try {
+              await refreshRole();
+            } finally {
+              setRefreshing(false);
+            }
+          }}
+          className="inline-flex items-center justify-center rounded-lg border border-rule px-5 py-2.5 text-sm font-medium text-ink transition hover:border-blue hover:text-blue disabled:opacity-60"
+        >
+          {refreshing ? "Refreshing…" : "Refresh role"}
+        </button>
         <button
           type="button"
           onClick={async () => {

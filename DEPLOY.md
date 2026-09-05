@@ -48,9 +48,17 @@ service cloud.firestore {
 
 ### Admin access
 
-1. Create an account on `/register` (or in Firebase Auth console)
-2. Set `ADMIN_EMAILS=you@yourdomain.com` (comma-separated for multiple)
-3. Sign in → header shows **Admin** → `/admin` dashboard (orders, messages, stats)
+**Preferred: Firestore**
+
+1. Sign in once so `users/{uid}` is created
+2. Open `/account` and copy **User ID**
+3. Firebase Console → Firestore → `users` → open the document whose **Document ID equals that User ID**
+4. Set field `role` (string) to `admin`
+5. On `/account` click **Refresh role** (or sign out / sign in)
+
+Do **not** use the email as the document ID — only the Auth UID works.
+
+**Optional shortcut:** set `ADMIN_EMAILS=you@gmail.com` in env (comma-separated for multiple). Env allowlist overrides / promotes that email to admin on sync.
 
 ## 2. Deploy to Vercel
 

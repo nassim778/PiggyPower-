@@ -24,18 +24,25 @@ export function isAdminEmail(email: string | null | undefined): boolean {
   return adminEmails().has(email.trim().toLowerCase());
 }
 
+/** Accept "admin" / "Admin" / whitespace; anything else is customer. */
+export function normalizeRole(raw: unknown): UserRole {
+  if (typeof raw !== "string") return "customer";
+  return raw.trim().toLowerCase() === "admin" ? "admin" : "customer";
+}
+
 export async function resolveRole(
   uid: string,
   email: string | null,
 ): Promise<UserRole> {
+  // 1) Env allowlist always wins
   if (isAdminEmail(email)) return "admin";
 
   if (!isFirebaseConfigured()) return "customer";
 
+  // 2) Firestore users/{uid}.role
   const snap = await getDb().collection("users").doc(uid).get();
-  const role = snap.data()?.role;
-  if (role === "admin") return "admin";
-  return "customer";
+  if (!snap.exists) return "customer";
+  return normalizeRole(snap.data()?.role);
 }
 
 export async function ensureUserProfile(input: {
@@ -60,12 +67,24 @@ export async function ensureUserProfile(input: {
     return;
   }
 
-  // Promote if email was added to ADMIN_EMAILS
-  if (role === "admin" && existing.data()?.role !== "admin") {
-    await ref.set(
-      { role: "admin", updatedAt: new Date().toISOString() },
-      { merge: true },
-    );
+  const data = existing.data() || {};
+  const updates: Record<string, unknown> = {
+    updatedAt: new Date().toISOString(),
+  };
+
+  // Keep email in sync
+  if (input.email && data.email !== input.email) {
+    updates.email = input.email;
+  }
+
+  // Promote to admin when env or existing Firestore says so — never demote here
+  if (role === "admin" && normalizeRole(data.role) !== "admin") {
+    updates.role = "admin";
+  }
+
+  // If someone already set role=admin in Firestore, leave it alone
+  if (Object.keys(updates).length > 1 || updates.role) {
+    await ref.set(updates, { merge: true });
   }
 }
 

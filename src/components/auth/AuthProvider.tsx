@@ -83,7 +83,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setRole(null);
       return;
     }
-    const token = await current.getIdToken();
+    // Force a fresh token so server re-reads Firestore role
+    const token = await current.getIdToken(true);
     const r = await syncAndGetRole(token);
     setRole(r);
   }, []);
@@ -99,10 +100,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(next);
       if (next) {
         try {
-          const token = await next.getIdToken();
+          const token = await next.getIdToken(true);
           const r = await syncAndGetRole(token);
           setRole(r);
-        } catch {
+        } catch (err) {
+          console.error("[auth] sync failed", err);
           setRole("customer");
         }
       } else {
