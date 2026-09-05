@@ -1,26 +1,122 @@
 @import "tailwindcss";
 
+/* Palette sampled from officialpiggypower.com */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --paper: #ffffff;
+  --mist: #f3f5f7;
+  --ink: #1a1a1a;
+  --ash: #5c5c5c;
+  --rule: #e2e2e2;
+  --blue: #1e63b6;
+  --blue-deep: #076db1;
+  --blue-bright: #116dff;
+  --blue-soft: #b4c3ea;
+  --bloom: #ffffff;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-paper: var(--paper);
+  --color-mist: var(--mist);
+  --color-ink: var(--ink);
+  --color-ash: var(--ash);
+  --color-rule: var(--rule);
+  --color-blue: var(--blue);
+  --color-blue-deep: var(--blue-deep);
+  --color-blue-bright: var(--blue-bright);
+  --color-blue-soft: var(--blue-soft);
+  --color-bloom: var(--bloom);
+  --color-oxide: var(--blue);
+  --color-oxide-deep: var(--blue-deep);
+  --font-sans: var(--font-body);
+  --font-mono: var(--font-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-body), system-ui, sans-serif;
+    overflow-x: hidden;
+  }
+
+  img,
+  video,
+  svg {
+    max-width: 100%;
+    height: auto;
+  }
+
+  button,
+  a,
+  input,
+  textarea,
+  select {
+    touch-action: manipulation;
+  }
+
+  ::selection {
+    background: color-mix(in srgb, var(--blue) 28%, transparent);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  .btn-primary {
+    @apply inline-flex min-h-11 items-center justify-center gap-2 bg-blue px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-deep disabled:cursor-not-allowed disabled:opacity-50 sm:px-6 sm:py-3.5;
+  }
+
+  .btn-secondary {
+    @apply inline-flex min-h-10 items-center justify-center border border-blue bg-white px-3 py-2 text-xs font-medium text-blue transition hover:bg-blue hover:text-white sm:px-4 sm:py-2.5 sm:text-sm;
+  }
+
+  .btn-ghost {
+    @apply inline-flex min-h-11 items-center justify-center border border-rule bg-white px-5 py-3 text-sm font-medium text-ink transition hover:border-blue hover:text-blue sm:px-6 sm:py-3.5;
+  }
+
+  .label-mono {
+    @apply font-mono text-[10px] uppercase tracking-[0.2em] text-ash;
+  }
+
+  .page-wrap {
+    @apply mx-auto w-full max-w-6xl px-4 sm:px-6;
+  }
+
+  .safe-pb {
+    padding-bottom: max(1.25rem, env(safe-area-inset-bottom));
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-rise {
+  animation: rise 0.7s ease-out both;
+}
+
+.animate-rise-2 {
+  animation: rise 0.8s ease-out 0.1s both;
+}
+
+.animate-rise-3 {
+  animation: rise 0.85s ease-out 0.18s both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-rise,
+  .animate-rise-2,
+  .animate-rise-3 {
+    animation: none;
+  }
 }
