@@ -3,7 +3,7 @@ import { getFirestore, type Firestore } from "firebase-admin/firestore";
 
 let app: App | null = null;
 
-function getFirebaseApp(): App {
+export function getFirebaseApp(): App {
   if (app) return app;
   if (getApps().length > 0) {
     app = getApps()[0]!;

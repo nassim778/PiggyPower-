@@ -70,7 +70,7 @@ export default async function ProductPage({
             {product.longDescription}
           </div>
 
-          <div className="sticky bottom-0 z-10 -mx-4 mt-8 border-t border-rule bg-white/95 px-4 py-3 backdrop-blur safe-pb sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:px-0 sm:py-0 sm:backdrop-blur-none">
+          <div className="sticky bottom-0 z-10 -mx-4 mt-8 border-t border-rule bg-paper/95 px-4 py-3 backdrop-blur safe-pb sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:px-0 sm:py-0 sm:backdrop-blur-none">
             <AddToCartButton product={product} />
           </div>
 

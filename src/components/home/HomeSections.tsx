@@ -36,7 +36,7 @@ export function Hero() {
           </div>
         </div>
 
-        <div className="animate-rise-2 relative order-1 mx-auto aspect-[4/3] w-full max-w-sm overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-rule sm:aspect-square sm:max-w-md lg:order-2 lg:max-w-none">
+        <div className="animate-rise-2 relative order-1 mx-auto aspect-[4/3] w-full max-w-sm overflow-hidden rounded-2xl bg-bloom shadow-sm ring-1 ring-rule sm:aspect-square sm:max-w-md lg:order-2 lg:max-w-none">
           {heroSrc && (
             <Image
               src={heroSrc}
@@ -86,7 +86,7 @@ export function Spotlight() {
   return (
     <section className="bg-mist">
       <div className="mx-auto grid max-w-6xl items-center gap-6 px-4 py-12 sm:gap-8 sm:px-6 sm:py-16 lg:grid-cols-2">
-        <div className="relative mx-auto aspect-square w-full max-w-md overflow-hidden rounded-2xl bg-white ring-1 ring-rule lg:max-w-none">
+        <div className="relative mx-auto aspect-square w-full max-w-md overflow-hidden rounded-2xl bg-bloom ring-1 ring-rule lg:max-w-none">
           <Image
             src={img}
             alt={cell.name}
@@ -157,7 +157,7 @@ export function UseCasesHome() {
   ];
 
   return (
-    <section className="border-t border-rule bg-white">
+    <section className="border-t border-rule bg-bloom">
       <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
         <h2 className="text-2xl font-bold text-ink sm:text-3xl">How People Use PiggyPower</h2>
         <div className="mt-8 grid gap-4 sm:mt-10 sm:gap-6 md:grid-cols-3">

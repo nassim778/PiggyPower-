@@ -1,16 +1,29 @@
 # Deploy PiggyPower (Vercel + Firebase)
 
-The storefront runs on **Vercel**. **Firebase Firestore** stores contact messages and orders.
+The storefront runs on **Vercel**. **Firebase** handles Auth, Firestore (orders, messages, users).
 
 ## 1. Create a Firebase project
 
 1. Go to [Firebase Console](https://console.firebase.google.com/) → **Add project**
-2. Enable **Firestore Database** (start in production mode, pick a region)
-3. Open **Project settings → Service accounts → Generate new private key**
-4. From the downloaded JSON, map:
+2. Enable **Authentication** → **Sign-in method**:
+   - **Email/Password** → Enable
+   - **Google** → Enable → choose a support email → Save
+3. Under **Authentication → Settings → Authorized domains**, keep `localhost` and add:
+   - `piggypower.vercel.app`
+   - your custom domain (when you have one)
+4. Enable **Firestore Database** (start in production mode, pick a region)
+5. Open **Project settings → Service accounts → Generate new private key**
+6. From the downloaded JSON, map:
    - `project_id` → `FIREBASE_PROJECT_ID`
    - `client_email` → `FIREBASE_CLIENT_EMAIL`
    - `private_key` → `FIREBASE_PRIVATE_KEY`
+7. Add a **Web app** and copy the config into `NEXT_PUBLIC_FIREBASE_*` vars
+
+### Google sign-in notes
+
+- Firebase uses Google’s built-in OAuth for your project — no separate Google Cloud client ID is required for the default web setup.
+- If Google sign-in shows **unauthorized-domain**, add that host under Authorized domains.
+- Admin via Google: put that Gmail in `ADMIN_EMAILS`, then sign in with Google.
 
 ### Firestore collections (auto-created on first write)
 
@@ -18,8 +31,9 @@ The storefront runs on **Vercel**. **Firebase Firestore** stores contact message
 |------------|---------|
 | `contact_messages` | Contact form submissions |
 | `orders` | Pending / paid checkout records |
+| `users` | Customer / admin profiles (`role`) |
 
-Optional security: keep writes server-only via the Admin SDK (this app never writes from the browser). In Firestore rules you can deny all client access:
+Keep client Firestore locked down — this app reads/writes sensitive data via Admin SDK APIs:
 
 ```
 rules_version = '2';
@@ -32,6 +46,12 @@ service cloud.firestore {
 }
 ```
 
+### Admin access
+
+1. Create an account on `/register` (or in Firebase Auth console)
+2. Set `ADMIN_EMAILS=you@yourdomain.com` (comma-separated for multiple)
+3. Sign in → header shows **Admin** → `/admin` dashboard (orders, messages, stats)
+
 ## 2. Deploy to Vercel
 
 ### Option A — Dashboard (easiest)
@@ -43,9 +63,11 @@ service cloud.firestore {
 
 | Variable | Notes |
 |----------|--------|
+| `NEXT_PUBLIC_FIREBASE_*` | Web app config from Firebase |
 | `FIREBASE_PROJECT_ID` | From service account JSON |
 | `FIREBASE_CLIENT_EMAIL` | From service account JSON |
 | `FIREBASE_PRIVATE_KEY` | Full private key (include `-----BEGIN…-----`; Vercel accepts `\n`) |
+| `ADMIN_EMAILS` | Your admin email(s), comma-separated |
 | `STRIPE_SECRET_KEY` | `sk_test_…` or `sk_live_…` |
 | `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | `pk_test_…` or `pk_live_…` |
 | `PAYPAL_CLIENT_ID` | PayPal REST app ID |
@@ -61,10 +83,7 @@ service cloud.firestore {
 npm i -g vercel
 vercel login
 vercel
-vercel env add FIREBASE_PROJECT_ID
-vercel env add FIREBASE_CLIENT_EMAIL
-vercel env add FIREBASE_PRIVATE_KEY
-# …Stripe / PayPal
+# add env vars, then:
 vercel --prod
 ```
 
@@ -72,20 +91,30 @@ vercel --prod
 
 ```bash
 cp .env.example .env.local
-# fill Firebase + Stripe/PayPal
+# fill Firebase + ADMIN_EMAILS + Stripe/PayPal
 npm run dev
 ```
 
+Open:
+
+- `/login` / `/register` — customer accounts
+- `/account` — customer profile
+- `/admin` — admin dashboard (ADMIN_EMAILS only)
+
 ## 4. Verify after deploy
 
-1. `/contact` → submit → check Firestore `contact_messages`
-2. Stripe test card `4242 4242 4242 4242` → check `orders` with `status: paid`
-3. PayPal sandbox → same `orders` collection
+1. Enable Email/Password in Firebase Auth
+2. Register a user → appears in Firebase Auth + Firestore `users`
+3. Add that email to `ADMIN_EMAILS` → redeploy / restart → `/admin` works
+4. `/contact` → Firestore `contact_messages`
+5. Checkout → Firestore `orders`
 
 ## Architecture
 
 ```
 Browser  →  Vercel (Next.js)
+              ├─ Firebase Auth (client) + /api/auth/sync
+              ├─ /api/admin/*                 → Admin-only (Bearer ID token)
               ├─ /api/contact                 → Firestore contact_messages
               ├─ /api/stripe/create-payment-intent → Stripe + orders (pending)
               ├─ /api/orders/confirm          → Stripe verify + orders (paid)
@@ -93,4 +122,4 @@ Browser  →  Vercel (Next.js)
               └─ /api/paypal/capture-order    → PayPal + orders (paid)
 ```
 
-Secrets stay on the server. Only Stripe/PayPal **publishable** client IDs are public.
+Secrets stay on the server. Only Stripe/PayPal **publishable** client IDs and Firebase web config are public.

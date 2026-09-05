@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Class-based dark mode (toggle), not only system preference */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* Palette sampled from officialpiggypower.com */
 :root {
   --paper: #ffffff;
@@ -12,6 +15,30 @@
   --blue-bright: #116dff;
   --blue-soft: #b4c3ea;
   --bloom: #ffffff;
+  --danger-bg: #fef2f2;
+  --danger-border: #fecaca;
+  --danger-text: #b91c1c;
+  --success-text: #15803d;
+  --warn-text: #b45309;
+}
+
+.dark {
+  --paper: #0f1419;
+  --mist: #1a222c;
+  --ink: #eef2f6;
+  --ash: #9aa5b1;
+  --rule: #2a3441;
+  --blue: #3b82f6;
+  --blue-deep: #2563eb;
+  --blue-bright: #60a5fa;
+  --blue-soft: #1e3a5f;
+  --bloom: #151c24;
+  --danger-bg: #3f1d1d;
+  --danger-border: #7f1d1d;
+  --danger-text: #fca5a5;
+  --success-text: #86efac;
+  --warn-text: #fcd34d;
+  color-scheme: dark;
 }
 
 @theme inline {
@@ -27,6 +54,11 @@
   --color-bloom: var(--bloom);
   --color-oxide: var(--blue);
   --color-oxide-deep: var(--blue-deep);
+  --color-danger-bg: var(--danger-bg);
+  --color-danger-border: var(--danger-border);
+  --color-danger-text: var(--danger-text);
+  --color-success-text: var(--success-text);
+  --color-warn-text: var(--warn-text);
   --font-sans: var(--font-body);
   --font-mono: var(--font-mono);
 }
@@ -59,6 +91,13 @@
     touch-action: manipulation;
   }
 
+  input,
+  textarea,
+  select {
+    background-color: var(--bloom);
+    color: var(--ink);
+  }
+
   ::selection {
     background: color-mix(in srgb, var(--blue) 28%, transparent);
   }
@@ -70,11 +109,11 @@
   }
 
   .btn-secondary {
-    @apply inline-flex min-h-10 items-center justify-center border border-blue bg-white px-3 py-2 text-xs font-medium text-blue transition hover:bg-blue hover:text-white sm:px-4 sm:py-2.5 sm:text-sm;
+    @apply inline-flex min-h-10 items-center justify-center border border-blue bg-paper px-3 py-2 text-xs font-medium text-blue transition hover:bg-blue hover:text-white sm:px-4 sm:py-2.5 sm:text-sm;
   }
 
   .btn-ghost {
-    @apply inline-flex min-h-11 items-center justify-center border border-rule bg-white px-5 py-3 text-sm font-medium text-ink transition hover:border-blue hover:text-blue sm:px-6 sm:py-3.5;
+    @apply inline-flex min-h-11 items-center justify-center border border-rule bg-paper px-5 py-3 text-sm font-medium text-ink transition hover:border-blue hover:text-blue sm:px-6 sm:py-3.5;
   }
 
   .label-mono {
@@ -87,6 +126,14 @@
 
   .safe-pb {
     padding-bottom: max(1.25rem, env(safe-area-inset-bottom));
+  }
+
+  .surface {
+    @apply border border-rule bg-bloom;
+  }
+
+  .alert-error {
+    @apply rounded-lg border border-danger-border bg-danger-bg px-3 py-2 text-sm text-danger-text;
   }
 }
 

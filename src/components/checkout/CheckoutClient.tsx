@@ -84,7 +84,7 @@ function StripeForm({
         }}
       />
       {error && (
-        <p className="border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+        <p className="border border-danger-border bg-danger-bg px-3 py-2 text-sm text-danger-text">
           {error}
         </p>
       )}
@@ -270,7 +270,7 @@ export function CheckoutClient() {
           ))}
         </div>
 
-        <div className="mt-6 overflow-hidden rounded-xl border border-rule bg-white p-4 sm:p-5">
+        <div className="mt-6 overflow-hidden rounded-xl border border-rule bg-bloom p-4 sm:p-5">
           {error && (
             <p className="mb-4 break-words border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
               {error}

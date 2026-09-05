@@ -3,6 +3,8 @@ import { Figtree, IBM_Plex_Mono } from "next/font/google";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { CartDrawer } from "@/components/cart/CartDrawer";
+import { AuthProvider } from "@/components/auth/AuthProvider";
+import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import "./globals.css";
 
 const body = Figtree({
@@ -31,8 +33,25 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#1e63b6",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#1e63b6" },
+    { media: "(prefers-color-scheme: dark)", color: "#0f1419" },
+  ],
 };
+
+const themeInitScript = `
+(function(){
+  try {
+    var k = 'piggypower-theme';
+    var t = localStorage.getItem(k);
+    if (t !== 'light' && t !== 'dark') {
+      t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    if (t === 'dark') document.documentElement.classList.add('dark');
+    document.documentElement.style.colorScheme = t;
+  } catch (e) {}
+})();
+`;
 
 export default function RootLayout({
   children,
@@ -40,12 +59,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${body.variable} ${mono.variable} h-full antialiased`}>
+    <html lang="en" className={`${body.variable} ${mono.variable} h-full antialiased`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
       <body className="flex min-h-full flex-col overflow-x-hidden bg-paper font-sans text-ink">
-        <Header />
-        <main className="w-full flex-1">{children}</main>
-        <Footer />
-        <CartDrawer />
+        <ThemeProvider>
+          <AuthProvider>
+            <Header />
+            <main className="w-full flex-1">{children}</main>
+            <Footer />
+            <CartDrawer />
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -54,7 +54,7 @@ export function CartDrawer() {
         aria-label="Close cart"
         onClick={closeCart}
       />
-      <aside className="absolute inset-y-0 right-0 flex h-full w-full max-w-md flex-col bg-white shadow-xl sm:w-[min(100%,28rem)]">
+      <aside className="absolute inset-y-0 right-0 flex h-full w-full max-w-md flex-col bg-bloom shadow-xl sm:w-[min(100%,28rem)]">
         <div className="flex items-center justify-between border-b border-rule px-4 py-4 pt-[max(1rem,env(safe-area-inset-top))] sm:px-5">
           <h2 className="text-lg font-bold text-ink">Your Cart</h2>
           <button
