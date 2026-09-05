@@ -30,19 +30,27 @@ export function normalizeRole(raw: unknown): UserRole {
   return raw.trim().toLowerCase() === "admin" ? "admin" : "customer";
 }
 
+/**
+ * Source of truth: Firestore `users/{uid}.role`.
+ * Change it to "admin" or "customer" in the console — the app reads that value.
+ * ADMIN_EMAILS is only a fallback if the doc has no role field yet.
+ */
 export async function resolveRole(
   uid: string,
   email: string | null,
 ): Promise<UserRole> {
-  // 1) Env allowlist always wins
+  if (isFirebaseConfigured()) {
+    const snap = await getDb().collection("users").doc(uid).get();
+    if (snap.exists) {
+      const raw = snap.data()?.role;
+      if (raw !== undefined && raw !== null && String(raw).trim() !== "") {
+        return normalizeRole(raw);
+      }
+    }
+  }
+
   if (isAdminEmail(email)) return "admin";
-
-  if (!isFirebaseConfigured()) return "customer";
-
-  // 2) Firestore users/{uid}.role
-  const snap = await getDb().collection("users").doc(uid).get();
-  if (!snap.exists) return "customer";
-  return normalizeRole(snap.data()?.role);
+  return "customer";
 }
 
 export async function ensureUserProfile(input: {
@@ -54,36 +62,36 @@ export async function ensureUserProfile(input: {
 
   const ref = getDb().collection("users").doc(input.uid);
   const existing = await ref.get();
-  const role = await resolveRole(input.uid, input.email);
 
   if (!existing.exists) {
+    // New users only — never overwrite role on existing docs
     await ref.set({
       email: input.email,
       displayName: input.displayName || null,
-      role,
+      role: "customer",
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     });
     return;
   }
 
+  // Existing user: update profile fields only — do NOT touch `role`
   const data = existing.data() || {};
-  const updates: Record<string, unknown> = {
-    updatedAt: new Date().toISOString(),
-  };
+  const updates: Record<string, unknown> = {};
 
-  // Keep email in sync
   if (input.email && data.email !== input.email) {
     updates.email = input.email;
   }
-
-  // Promote to admin when env or existing Firestore says so — never demote here
-  if (role === "admin" && normalizeRole(data.role) !== "admin") {
-    updates.role = "admin";
+  if (
+    input.displayName &&
+    input.displayName !== data.displayName &&
+    !data.displayName
+  ) {
+    updates.displayName = input.displayName;
   }
 
-  // If someone already set role=admin in Firestore, leave it alone
-  if (Object.keys(updates).length > 1 || updates.role) {
+  if (Object.keys(updates).length > 0) {
+    updates.updatedAt = new Date().toISOString();
     await ref.set(updates, { merge: true });
   }
 }

@@ -83,7 +83,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setRole(null);
       return;
     }
-    // Force a fresh token so server re-reads Firestore role
     const token = await current.getIdToken(true);
     const r = await syncAndGetRole(token);
     setRole(r);
@@ -105,7 +104,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setRole(r);
         } catch (err) {
           console.error("[auth] sync failed", err);
-          setRole("customer");
+          // Keep previous role if we had one; only default when unknown
+          setRole((prev) => prev ?? "customer");
         }
       } else {
         setRole(null);
@@ -115,6 +115,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     return () => unsub();
   }, [configured]);
+
+  // Re-read Firestore role when tab is focused again (after you edit Console)
+  useEffect(() => {
+    if (!configured) return;
+
+    const onFocus = () => {
+      if (getClientAuth().currentUser) {
+        void refreshRole();
+      }
+    };
+
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") onFocus();
+    });
+
+    return () => {
+      window.removeEventListener("focus", onFocus);
+    };
+  }, [configured, refreshRole]);
 
   const getIdToken = useCallback(async () => {
     if (!user) return null;
