@@ -10,7 +10,7 @@ export function ProductCard({ product }: { product: Product }) {
   const addItem = useCartStore((s) => s.addItem);
 
   return (
-    <article className="group flex h-full flex-col overflow-hidden rounded-xl border border-rule bg-bloom transition hover:border-blue/40 hover:shadow-md">
+    <article className="group flex h-full flex-col overflow-hidden rounded-xl border border-rule bg-bloom transition hover:border-rule hover:shadow-sm dark:hover:shadow-none">
       <Link href={`/shop/${product.slug}`} className="relative aspect-square bg-mist">
         <ProductImage
           slug={product.slug}

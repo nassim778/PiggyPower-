@@ -11,7 +11,7 @@ export function Hero() {
 
   return (
     <section className="relative overflow-hidden bg-mist">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_20%,rgba(30,99,182,0.18),transparent_55%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_20%,rgba(30,99,182,0.12),transparent_55%)] dark:bg-none" />
       <div className="relative mx-auto grid max-w-6xl items-center gap-8 px-4 py-10 sm:gap-10 sm:px-6 sm:py-16 lg:grid-cols-2 lg:py-20">
         <div className="animate-rise order-2 lg:order-1">
           <h1 className="text-[1.85rem] font-bold leading-[1.15] tracking-tight text-ink sm:text-4xl md:text-5xl">
@@ -47,7 +47,7 @@ export function Hero() {
               sizes="(max-width: 640px) 90vw, (max-width: 1024px) 50vw, 45vw"
             />
           )}
-          <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-inset ring-blue/10" />
+          <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-inset ring-rule dark:ring-rule" />
         </div>
       </div>
     </section>
