@@ -26,14 +26,16 @@ export function isAdminEmail(email: string | null | undefined): boolean {
 
 /** Accept "admin" / "Admin" / whitespace; anything else is customer. */
 export function normalizeRole(raw: unknown): UserRole {
-  if (typeof raw !== "string") return "customer";
-  return raw.trim().toLowerCase() === "admin" ? "admin" : "customer";
+  return String(raw ?? "")
+    .trim()
+    .toLowerCase() === "admin"
+    ? "admin"
+    : "customer";
 }
 
 /**
  * Source of truth: Firestore `users/{uid}.role`.
  * Change it to "admin" or "customer" in the console — the app reads that value.
- * ADMIN_EMAILS is only a fallback if the doc has no role field yet.
  */
 export async function resolveRole(
   uid: string,
@@ -42,7 +44,9 @@ export async function resolveRole(
   if (isFirebaseConfigured()) {
     const snap = await getDb().collection("users").doc(uid).get();
     if (snap.exists) {
-      const raw = snap.data()?.role;
+      const data = snap.data() || {};
+      // Prefer `role`, but also accept accidental `Role`
+      const raw = data.role ?? data.Role;
       if (raw !== undefined && raw !== null && String(raw).trim() !== "") {
         return normalizeRole(raw);
       }
