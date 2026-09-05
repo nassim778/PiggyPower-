@@ -66,7 +66,10 @@ async function syncAndGetRole(
     const data = (await res.json().catch(() => ({}))) as { error?: string };
     throw new Error(data.error || "Failed to sync account.");
   }
-  const data = (await res.json()) as { role?: UserRole };
+  const data = (await res.json()) as { role?: UserRole; uid?: string };
+  if (process.env.NODE_ENV === "development") {
+    console.info("[auth] synced", { uid: data.uid, role: data.role });
+  }
   return data.role === "admin" ? "admin" : "customer";
 }
 
